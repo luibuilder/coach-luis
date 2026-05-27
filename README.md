@@ -1,0 +1,136 @@
+[coach_luis_qr.html](https://github.com/user-attachments/files/28306489/coach_luis_qr.html)
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coach Luis QR</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    min-height:100vh;
+    background:#0c1428;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    font-family:'DM Sans', sans-serif;
+    padding:40px 20px; gap:0;
+  }
+
+  .top-label {
+    font-size:10px; letter-spacing:3px;
+    text-transform:uppercase;
+    color:rgba(201,168,76,0.5);
+    margin-bottom:28px;
+    animation: fadeIn .6s ease both;
+  }
+
+  .qr-outer {
+    position:relative;
+    display:flex; flex-direction:column;
+    align-items:center;
+    animation: floatIn .7s cubic-bezier(.22,1,.36,1) both;
+    cursor:pointer;
+  }
+  .qr-outer:hover .qr-box { border-color:rgba(201,168,76,0.6); }
+
+  .qr-box {
+    background:#fff;
+    padding:16px;
+    border-radius:16px;
+    border:2px solid rgba(201,168,76,0.25);
+    box-shadow:0 24px 60px rgba(0,0,0,0.5);
+    transition:border-color .2s;
+    position:relative;
+  }
+
+  /* 모서리 장식 */
+  .qr-box::before, .qr-box::after {
+    content:'';
+    position:absolute;
+    width:20px; height:20px;
+    border-color:#c9a84c; border-style:solid;
+  }
+  .qr-box::before { top:-2px; left:-2px; border-width:3px 0 0 3px; border-radius:4px 0 0 0; }
+  .qr-box::after  { bottom:-2px; right:-2px; border-width:0 3px 3px 0; border-radius:0 0 4px 0; }
+
+  #qrcode { display:block; }
+
+  /* 중앙 문구 오버레이 */
+  .qr-overlay {
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    background:rgba(12,20,40,0.88);
+    border:1px solid rgba(201,168,76,0.4);
+    border-radius:8px;
+    padding:7px 12px;
+    text-align:center;
+    white-space:nowrap;
+    pointer-events:none;
+  }
+  .qr-overlay span {
+    font-size:10px;
+    color:#f5e6b8;
+    letter-spacing:0.5px;
+    line-height:1.5;
+    display:block;
+  }
+
+  .name-wrap {
+    margin-top:24px;
+    text-align:center;
+    animation: fadeIn .7s .2s ease both;
+  }
+  .name-wrap h1 {
+    font-family:'DM Serif Display', serif;
+    font-size:26px; color:#f5e6b8;
+    letter-spacing:-0.3px; margin-bottom:4px;
+  }
+  .name-wrap p {
+    font-size:10px; letter-spacing:2.5px;
+    text-transform:uppercase;
+    color:rgba(245,230,184,0.4);
+  }
+
+  @keyframes floatIn {
+    from { opacity:0; transform:translateY(20px) scale(.97); }
+    to   { opacity:1; transform:translateY(0) scale(1); }
+  }
+  @keyframes fadeIn {
+    from { opacity:0; } to { opacity:1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-label">COACH LUIS · DIGITAL CARD</div>
+
+<div class="qr-outer" onclick="window.location.href='https://luibuilder.github.io/coach-luis/'">
+  <div class="qr-box">
+    <div id="qrcode"></div>
+    <div class="qr-overlay">
+      <span>📷 카메라를 대거나</span>
+      <span>이곳을 누르세요</span>
+    </div>
+  </div>
+</div>
+
+<div class="name-wrap">
+  <h1>Coach Luis</h1>
+  <p>AI 창업 코치</p>
+</div>
+
+<script>
+  new QRCode(document.getElementById('qrcode'), {
+    text: 'https://luibuilder.github.io/coach-luis/',
+    width: 220,
+    height: 220,
+    colorDark: '#0f1f4a',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+</script>
+</body>
+</html>
