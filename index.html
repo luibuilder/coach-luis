@@ -402,6 +402,9 @@
   <!-- 명함 카메라 스캔 버튼 및 숨김 인풋 -->
   <button class="scan-btn" onclick="triggerScan()">📷 상대방 명함 카메라 스캔</button>
   <input type="file" id="ocrFileInput" accept="image/*" capture="camera" style="display:none;" onchange="handleOcrFile(event)">
+  <div style="font-size: 10px; color: rgba(201,168,76,0.6); text-align: center; margin-top: -6px; margin-bottom: 12px; line-height: 1.4;">
+    ※ 카메라가 열리면 명함을 대고 <b>[직접 사진 촬영]</b>한 후, <b>[사진 사용]</b>(또는 확인)을 누르셔야 텍스트 스캔이 작동합니다.
+  </div>
   
   <div class="field">
     <input type="text" id="inputName" placeholder="이름">
@@ -525,7 +528,7 @@
     } catch (err) {
       console.error(err);
       loader.classList.remove('active');
-      showToast('⚠ 스캔 실패. 직접 작성해주세요.');
+      showToast(`⚠ 스캔 실패: ${err.message || '인식 오류'}. 직접 작성해주세요.`);
     }
 
     event.target.value = '';
