@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coach Luis</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    background: #0c1428;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Sans', sans-serif;
+    padding: 40px 20px;
+    gap: 20px;
+  }
+
+  /* 명함 */
+  .card {
+    width: 420px;
+    height: 227px;
+    background: linear-gradient(135deg, #0f1f4a 0%, #1a3068 100%);
+    border-radius: 12px;
+    padding: 30px 34px 26px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 36px 80px rgba(0,0,0,0.55), 0 6px 20px rgba(0,0,0,0.3);
+    animation: floatIn .7s cubic-bezier(.22,1,.36,1) both;
+  }
+
+  @keyframes floatIn {
+    from { opacity:0; transform:translateY(20px) scale(.97); }
+    to   { opacity:1; transform:translateY(0) scale(1); }
+  }
+
+  .card::before {
+    content:''; position:absolute; right:-52px; top:-52px;
+    width:200px; height:200px; border-radius:50%;
+    border:1px solid rgba(201,168,76,0.1); pointer-events:none;
+  }
+  .card::after {
+    content:''; position:absolute; right:-26px; top:-26px;
+    width:120px; height:120px; border-radius:50%;
+    border:1px solid rgba(201,168,76,0.06); pointer-events:none;
+  }
+
+  .card-top { position:relative; z-index:1; }
+  .card-name {
+    font-family:'DM Serif Display', serif;
+    font-size:30px; color:#f5e6b8;
+    letter-spacing:-0.4px; line-height:1; margin-bottom:6px;
+  }
+  .card-title {
+    font-size:9.5px; font-weight:400;
+    color:rgba(245,230,184,0.45);
+    letter-spacing:2.5px; text-transform:uppercase;
+  }
+  .card-bottom { position:relative; z-index:1; }
+  .card-tagline {
+    font-size:12px; color:rgba(255,255,255,0.48);
+    font-weight:300; font-style:italic; margin-bottom:13px;
+  }
+  .contacts { display:flex; flex-direction:column; gap:8px; }
+  .contact-link {
+    display:inline-flex; align-items:center; gap:9px;
+    text-decoration:none; transition:all .18s; width:fit-content;
+  }
+  .contact-link:hover .contact-text { color:rgba(245,230,184,0.9); }
+  .contact-link:hover .icon-wrap { border-color:rgba(201,168,76,0.6); }
+  .icon-wrap {
+    width:22px; height:22px; border-radius:50%;
+    border:1px solid rgba(255,255,255,0.2);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; transition:border-color .18s;
+  }
+  .icon-wrap svg {
+    width:11px; height:11px;
+    stroke:rgba(255,255,255,0.55); fill:none;
+    stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round;
+  }
+  .contact-text {
+    font-size:11.5px; color:rgba(255,255,255,0.42);
+    font-weight:300; letter-spacing:0.2px; transition:color .18s;
+  }
+
+  /* 연락처 입력 박스 */
+  .input-section {
+    width: 420px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 12px;
+    padding: 22px 24px;
+    animation: floatIn .7s .15s cubic-bezier(.22,1,.36,1) both;
+  }
+
+  .input-title {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(201,168,76,0.6);
+    margin-bottom: 16px;
+  }
+
+  .field { margin-bottom: 12px; }
+  .field input {
+    width: 100%;
+    padding: 11px 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .field input:focus { border-color: rgba(201,168,76,0.4); }
+  .field input::placeholder { color: rgba(255,255,255,0.2); font-size: 13px; }
+
+  .submit-btn {
+    width: 100%;
+    padding: 12px;
+    background: #c9a84c;
+    border: none;
+    border-radius: 8px;
+    color: #0f1f4a;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity .15s;
+    margin-top: 4px;
+  }
+  .submit-btn:hover { opacity: 0.85; }
+
+  /* 토스트 */
+  .toast {
+    position:fixed; bottom:36px; left:50%;
+    transform:translateX(-50%) translateY(10px);
+    background:#c9a84c; color:#0f1f4a;
+    padding:9px 20px; border-radius:4px;
+    font-size:12px; font-weight:600;
+    opacity:0; transition:all .25s;
+    pointer-events:none; white-space:nowrap;
+  }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (max-width: 460px) {
+    .card, .input-section, .portfolio-section { width: 100%; }
+    .card { height: auto; min-height: 200px; }
+    .card-body { flex-direction: column; align-items: flex-start; gap: 20px; }
+    .qr-container { align-self: center; margin-top: 10px; }
+  }
+
+  /* 신규 레이아웃 & QR 코드 */
+  .card-body {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    z-index: 1;
+  }
+  .card-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    flex: 1;
+  }
+  .qr-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(201, 168, 76, 0.15);
+    border-radius: 8px;
+    padding: 8px;
+    flex-shrink: 0;
+  }
+  .qr-code {
+    width: 76px;
+    height: 76px;
+    display: block;
+  }
+  .qr-label {
+    font-size: 8px;
+    color: rgba(201, 168, 76, 0.6);
+    letter-spacing: 1px;
+    font-weight: 500;
+  }
+
+  /* 포트폴리오 섹션 */
+  .portfolio-section {
+    width: 420px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 20px;
+    animation: floatIn .7s .1s cubic-bezier(.22,1,.36,1) both;
+  }
+  .portfolio-title {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(201,168,76,0.6);
+    margin-bottom: 12px;
+  }
+  .portfolio-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .portfolio-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 8px;
+    padding: 10px 14px;
+    text-decoration: none;
+    transition: all .2s;
+  }
+  .portfolio-item:hover {
+    background: rgba(201,168,76,0.08);
+    border-color: rgba(201,168,76,0.25);
+    transform: translateY(-1px);
+  }
+  .portfolio-item-icon {
+    font-size: 18px;
+  }
+  .portfolio-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .portfolio-item-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.9);
+  }
+  .portfolio-item-desc {
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+  }
+
+  /* OCR 스캔 */
+  .scan-btn {
+    width: 100%;
+    padding: 11px;
+    background: rgba(201,168,76,0.08);
+    border: 1px dashed rgba(201,168,76,0.35);
+    border-radius: 8px;
+    color: #c9a84c;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .scan-btn:hover {
+    background: rgba(201,168,76,0.15);
+    border-color: #c9a84c;
+  }
+  
+  /* OCR 로더 오버레이 */
+  .ocr-loader {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(12, 20, 40, 0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .ocr-loader.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .loader-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  .pulse-spinner {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: #c9a84c;
+    box-shadow: 0 0 0 0 rgba(201, 168, 76, 0.6);
+    animation: pulse 1.5s infinite cubic-bezier(0.66, 0, 0, 1);
+  }
+  @keyframes pulse {
+    to {
+      box-shadow: 0 0 0 24px rgba(201, 168, 76, 0);
+    }
+  }
+  .loader-text {
+    color: #f5e6b8;
+    font-size: 13.5px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+<!-- 명함 -->
+<div class="card">
+  <div class="card-body">
+    <div class="card-info">
+      <div class="card-top">
+        <div class="card-name">Coach Luis</div>
+        <div class="card-title">AI 창업 코치</div>
+      </div>
+      <div class="card-bottom">
+        <div class="card-tagline">사이클만 돌면 MVP가 뚝딱!</div>
+        <div class="contacts">
+          <a class="contact-link" href="mailto:luikim1000@gmail.com">
+            <div class="icon-wrap">
+              <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="1"/><polyline points="2,5 12,13 22,5"/></svg>
+            </div>
+            <span class="contact-text">luikim1000@gmail.com</span>
+          </a>
+          <a class="contact-link" href="tel:01086102379">
+            <div class="icon-wrap">
+              <svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+            </div>
+            <span class="contact-text">010-8610-2379</span>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="qr-container">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://luibuilder.github.io/linktree-maker/&color=c9a84c&bgcolor=0f1f4a" alt="QR Code" class="qr-code">
+      <div class="qr-label">PORTFOLIO QR</div>
+    </div>
+  </div>
+</div>
+
+<!-- 포트폴리오 링크 섹션 -->
+<div class="portfolio-section">
+  <div class="portfolio-title">Coach Luis's Builds</div>
+  <div class="portfolio-grid">
+    <a href="https://luibuilder.github.io/positioning-map-app/" target="_blank" class="portfolio-item">
+      <span class="portfolio-item-icon">🗺️</span>
+      <div class="portfolio-item-info">
+        <span class="portfolio-item-name">포지셔닝 맵</span>
+        <span class="portfolio-item-desc">시장 포지셔닝 분석 툴</span>
+      </div>
+    </a>
+    <a href="https://luibuilder.github.io/linktree-maker/" target="_blank" class="portfolio-item">
+      <span class="portfolio-item-icon">🌳</span>
+      <div class="portfolio-item-info">
+        <span class="portfolio-item-name">링크트리 포트폴리오</span>
+        <span class="portfolio-item-desc">멀티 링크 관리 제작 도구</span>
+      </div>
+    </a>
+    <a href="https://al06team8.web.app/" target="_blank" class="portfolio-item">
+      <span class="portfolio-item-icon">⚡</span>
+      <div class="portfolio-item-info">
+        <span class="portfolio-item-name">방문인증 체험단</span>
+        <span class="portfolio-item-desc">예약 및 방문인증 자동화 탑재 체험단</span>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- 연락처 입력 -->
+<div class="input-section">
+  <div class="input-title">연락처 남기기</div>
+  
+  <!-- 명함 카메라 스캔 버튼 및 숨김 인풋 -->
+  <button class="scan-btn" onclick="triggerScan()">📷 상대방 명함 카메라 스캔</button>
+  <input type="file" id="ocrFileInput" accept="image/*" capture="camera" style="display:none;" onchange="handleOcrFile(event)">
+  
+  <div class="field">
+    <input type="text" id="inputName" placeholder="이름">
+  </div>
+  <div class="field">
+    <input type="tel" id="inputPhone" placeholder="전화번호">
+  </div>
+  <div class="field">
+    <input type="text" id="inputNote" placeholder="회사 혹은 만난 장소 (선택)">
+  </div>
+  <button class="submit-btn" onclick="submitContact()">전송하기</button>
+</div>
+
+<!-- OCR 로더 오버레이 -->
+<div id="ocrLoader" class="ocr-loader">
+  <div class="loader-content">
+    <div class="pulse-spinner"></div>
+    <div class="loader-text" id="loaderText">명함 이미지 분석 중...</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  document.querySelectorAll('.contact-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      if (link.href.startsWith('mailto')) {
+        showToast('MAIL ↗');
+      } else {
+        showToast('CALLING ↗');
+      }
+    });
+  });
+
+  function submitContact() {
+    const name = document.getElementById('inputName').value.trim();
+    const phone = document.getElementById('inputPhone').value.trim();
+    const note = document.getElementById('inputNote').value.trim();
+    if (!name || !phone) { showToast('이름과 전화번호를 입력해주세요'); return; }
+    
+    // 이메일 전송 대신 SMS 발송으로 전환 (내 명함 정보 및 포트폴리오 링크 첨부)
+    const smsText = `[Coach Luis] 안녕하세요! 미팅 때 나눈 대화 즐거웠습니다. 제 명함 정보를 보내드립니다.\n\n` +
+                    `• 이름: Coach Luis (AI 창업 코치)\n` +
+                    `• 연락처: 010-8610-2379\n` +
+                    `• 이메일: luikim1000@gmail.com\n` +
+                    `• 슬로건: 사이클만 돌면 MVP가 뚝딱!\n\n` +
+                    `👇 포트폴리오 및 빌드 링크 모음:\n` +
+                    `https://luibuilder.github.io/linktree-maker/` + 
+                    (note ? `\n\n(참고: ${note}에서 만남)` : '');
+                    
+    const encodedText = encodeURIComponent(smsText);
+    
+    // iOS와 Android의 SMS 쿼리 파라미터 구분자 자동 인식
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const separator = isIOS ? '&' : '?';
+    
+    // SMS 발송 트리거
+    window.location.href = `sms:${phone}${separator}body=${encodedText}`;
+    showToast('✓ 문자 전송 화면으로 연결합니다!');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  /* OCR 카메라 스캔 로직 */
+  function triggerScan() {
+    document.getElementById('ocrFileInput').click();
+  }
+
+  async function handleOcrFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const loader = document.getElementById('ocrLoader');
+    const loaderText = document.getElementById('loaderText');
+    loader.classList.add('active');
+    loaderText.textContent = '명함 이미지 분석 시작...';
+
+    try {
+      // Tesseract.js v5 API 호출
+      const result = await Tesseract.recognize(
+        file,
+        'kor+eng',
+        {
+          logger: m => {
+            if (m.status === 'recognizing text') {
+              loaderText.textContent = `명함 분석 중... (${Math.round(m.progress * 100)}%)`;
+            }
+          }
+        }
+      );
+
+      loader.classList.remove('active');
+
+      const text = result.data.text;
+      const info = parseOCRText(text);
+
+      if (info.phone || info.name || info.company) {
+        if (info.name) document.getElementById('inputName').value = info.name;
+        
+        if (info.phone) {
+          let rawPhone = info.phone;
+          if (rawPhone.length === 11) {
+            rawPhone = rawPhone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+          } else if (rawPhone.length === 10) {
+            rawPhone = rawPhone.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+          }
+          document.getElementById('inputPhone').value = rawPhone;
+        }
+        
+        if (info.company) document.getElementById('inputNote').value = info.company;
+        showToast('✓ 명함 정보가 자동 입력되었습니다.');
+      } else {
+        showToast('정보를 파싱하지 못했습니다. 수동으로 입력해주세요.');
+      }
+    } catch (err) {
+      console.error(err);
+      loader.classList.remove('active');
+      showToast('⚠ 스캔 실패. 직접 작성해주세요.');
+    }
+
+    event.target.value = '';
+  }
+
+  function parseOCRText(text) {
+    console.log("OCR Result:\n", text);
+    
+    const phoneRegex = /(01[016789][-.\s]?\d{3,4}[-.\s]?\d{4})|(\d{2,3}[-.\s]?\d{3,4}[-.\s]?\d{4})/;
+    const phoneMatch = text.match(phoneRegex);
+
+    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
+    const emailMatch = text.match(emailRegex);
+
+    const lines = text.split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0);
+
+    let name = '';
+    let company = '';
+
+    const filteredLines = lines.filter(line => {
+      return !phoneRegex.test(line) &&
+             !emailRegex.test(line) &&
+             !/http[s]?:\/\//.test(line) &&
+             !/www\./.test(line) &&
+             !/tel|phone|fax|email|mail|이메일|전화|대표|팩스|주소|서울|경기/i.test(line);
+    });
+
+    if (filteredLines.length > 0) {
+      name = filteredLines[0];
+      if (name.length > 10) {
+        name = name.slice(0, 10);
+      }
+      if (filteredLines.length > 1) {
+        company = filteredLines[1];
+        if (company.length > 30) {
+          company = company.slice(0, 30);
+        }
+      }
+    }
+
+    return {
+      phone: phoneMatch ? phoneMatch[0].replace(/[^0-9]/g, '') : '',
+      name: name,
+      company: company
+    };
+  }
+</script>
+</body>
+</html>
