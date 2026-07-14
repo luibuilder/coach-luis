@@ -354,8 +354,8 @@
       </div>
     </div>
     <div class="qr-container">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://luibuilder.github.io/coach-luis/&color=c9a84c&bgcolor=0f1f4a" alt="QR Code" class="qr-code">
-      <div class="qr-label">COACH LUIS QR</div>
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://luibuilder.github.io/linktree-maker/&color=c9a84c&bgcolor=0f1f4a" alt="QR Code" class="qr-code">
+      <div class="qr-label">PORTFOLIO QR</div>
     </div>
   </div>
 </div>
@@ -435,14 +435,14 @@
     const note = document.getElementById('inputNote').value.trim();
     if (!name || !phone) { showToast('이름과 전화번호를 입력해주세요'); return; }
     
-    // 이메일 전송 대신 SMS 발송으로 전환 (내 명함 정보 및 포트폴리오 링크 첨부)
+    // 이메일 전송 대신 SMS 발송으로 전환 (내 명함 정보 및 전체 포트폴리오 모음 링크 첨부)
     const smsText = `[Coach Luis] 안녕하세요! 미팅 때 나눈 대화 즐거웠습니다. 제 명함 정보를 보내드립니다.\n\n` +
                     `• 이름: Coach Luis (AI 창업 코치)\n` +
                     `• 연락처: 010-8610-2379\n` +
                     `• 이메일: luikim1000@gmail.com\n` +
                     `• 슬로건: 사이클만 돌면 MVP가 뚝딱!\n\n` +
-                    `👇 포트폴리오 및 빌드 링크 모음:\n` +
-                    `https://luibuilder.github.io/linktree-maker/` + 
+                    `👇 모바일 명함 및 전체 포트폴리오:\n` +
+                    `https://luibuilder.github.io/coach-luis/` + 
                     (note ? `\n\n(참고: ${note}에서 만남)` : '');
                     
     const encodedText = encodeURIComponent(smsText);
